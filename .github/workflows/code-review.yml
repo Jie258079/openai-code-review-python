@@ -1,0 +1,49 @@
+name: AI Code Review
+
+on:
+  push:
+    branches:
+      - main  # 可以根据需要修改为其他分支
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0  # 获取完整的git历史记录
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create .env file
+      run: |
+        echo "WECHAT_APPID=${{ secrets.WECHAT_APPID }}" >> .env
+        echo "WECHAT_SECRET=${{ secrets.WECHAT_SECRET }}" >> .env
+        echo "WECHAT_TEMPLATE_ID=${{ secrets.WECHAT_TEMPLATE_ID }}" >> .env
+        echo "CHATGLM_API_KEY=${{ secrets.CHATGLM_API_KEY }}" >> .env
+        echo "CHATGLM_API_URL=${{ secrets.CHATGLM_API_URL }}" >> .env
+        echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .env
+        echo "GITHUB_REPO=${{ github.repository }}" >> .env
+    
+    - name: Run code review
+      run: |
+        python src/main.py
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+    
+    - name: Handle failure
+      if: failure()
+      run: |
+        echo "Code review process failed. Please check the logs for details."
+        exit 1 
