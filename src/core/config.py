@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     DEEPSEEK_API_URL: str
 
     # GitHub配置
-    GITHUB_TOKEN: str
+    CODE_TOKEN: str
     GITHUB_REPO: Optional[str] = None
 
     # 评审配置

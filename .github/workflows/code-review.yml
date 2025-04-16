@@ -35,7 +35,7 @@ jobs:
         echo "DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions" >> .env
         echo "CODE_TOKEN=${{ secrets.CODE_TOKEN }}" >> .env
         echo "GITHUB_REPO=Jie258079/openai-code-review-python" >> .env
-    
+
     - name: Run code review
       run: |
         python src/main.py
