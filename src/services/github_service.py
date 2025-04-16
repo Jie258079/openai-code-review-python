@@ -6,7 +6,7 @@ from src.core.config import settings
 
 class GitHubService:
     def __init__(self):
-        self.token = settings.GITHUB_TOKEN
+        self.token = settings.CODE_TOKEN
         self.headers = {
             "Authorization": f"token {self.token}",
             "Accept": "application/vnd.github.v3+json"
