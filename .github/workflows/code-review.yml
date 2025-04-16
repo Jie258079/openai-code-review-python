@@ -31,8 +31,8 @@ jobs:
         echo "WECHAT_APPID=${{ secrets.WECHAT_APPID }}" >> .env
         echo "WECHAT_SECRET=${{ secrets.WECHAT_SECRET }}" >> .env
         echo "WECHAT_TEMPLATE_ID=${{ secrets.WECHAT_TEMPLATE_ID }}" >> .env
-        echo "CHATGLM_API_KEY=${{ secrets.CHATGLM_API_KEY }}" >> .env
-        echo "CHATGLM_API_URL=${{ secrets.CHATGLM_API_URL }}" >> .env
+        echo "DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}" >> .env
+        echo "DEEPSEEK_API_URL=${{ secrets.DEEPSEEK_API_URL }}" >> .env
         echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .env
         echo "GITHUB_REPO=${{ github.repository }}" >> .env
     
