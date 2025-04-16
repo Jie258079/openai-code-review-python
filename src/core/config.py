@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional
-from pydantic import validator
+from pydantic import field_validator
 
 
 class Settings(BaseSettings):
@@ -34,10 +34,11 @@ class Settings(BaseSettings):
     {diff}
     """
 
-    @validator('CODE_TOKEN', 'WECHAT_APPID', 'WECHAT_SECRET', 'WECHAT_TEMPLATE_ID')
-    def validate_required_fields(cls, v, field):
+    @field_validator('CODE_TOKEN', 'WECHAT_APPID', 'WECHAT_SECRET', 'WECHAT_TEMPLATE_ID')
+    @classmethod
+    def validate_required_fields(cls, v: str, info) -> str:
         if not v:
-            raise ValueError(f'{field.name} 不能为空')
+            raise ValueError(f'{info.field_name} 不能为空')
         return v
 
     class Config:
