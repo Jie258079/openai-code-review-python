@@ -8,6 +8,7 @@ class WeChatService:
         self.appid = settings.WECHAT_APPID
         self.secret = settings.WECHAT_SECRET
         self.template_id = settings.WECHAT_TEMPLATE_ID
+        self.touser = settings.WECHAT_TOUSER
         self.access_token = None
 
     def get_access_token(self) -> str:
@@ -49,8 +50,9 @@ class WeChatService:
 
             url = f"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={self.access_token}"
 
+            # 使用配置中的接收者
             data = {
-                "touser": review_data.get("touser", "@all"),
+                "touser": self.touser,
                 "template_id": self.template_id,
                 "url": review_data.get("review_url", ""),
                 "data": {
@@ -80,6 +82,9 @@ class WeChatService:
                     }
                 }
             }
+
+            # 记录发送的数据
+            logger.debug(f"发送微信通知数据: {data}")
 
             response = requests.post(url, json=data)
 
