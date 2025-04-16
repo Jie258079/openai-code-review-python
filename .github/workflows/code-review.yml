@@ -31,6 +31,7 @@ jobs:
         echo "WECHAT_APPID=wx6407bd04526890ef" >> .env
         echo "WECHAT_SECRET=51df33ed6853726d2a38bbbdfcbc0429" >> .env
         echo "WECHAT_TEMPLATE_ID=KbF7tOkw01wcmb-9u0rrkqpXB4tH-Fmojw5sChrMY64" >> .env
+        echo "WECHAT_TOUSER=oaBEg60ox6meGZz9t6RFs6xnKEJk" >> .env
         echo "DEEPSEEK_API_KEY=sk-67b7e4b57fc44664945a1fff523e1e1f" >> .env
         echo "DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions" >> .env
         echo "CODE_TOKEN=${{ secrets.CODE_TOKEN }}" >> .env
