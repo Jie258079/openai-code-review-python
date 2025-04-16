@@ -1,10 +1,10 @@
 import asyncio
 from loguru import logger
-from core.git_operations import GitOperations
-from core.ai_model import DeepSeekClient
-from services.wechat_service import WeChatService
-from services.github_service import GitHubService
-from core.config import settings
+from src.core.git_operations import GitOperations
+from src.core.ai_model import DeepSeekClient
+from src.services.wechat_service import WeChatService
+from src.services.github_service import GitHubService
+from src.core.config import settings
 
 
 class CodeReviewer:

@@ -28,13 +28,13 @@ jobs:
     
     - name: Create .env file
       run: |
-        echo "WECHAT_APPID=${{ secrets.WECHAT_APPID }}" >> .env
-        echo "WECHAT_SECRET=${{ secrets.WECHAT_SECRET }}" >> .env
-        echo "WECHAT_TEMPLATE_ID=${{ secrets.WECHAT_TEMPLATE_ID }}" >> .env
-        echo "DEEPSEEK_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}" >> .env
-        echo "DEEPSEEK_API_URL=${{ secrets.DEEPSEEK_API_URL }}" >> .env
-        echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> .env
-        echo "GITHUB_REPO=${{ github.repository }}" >> .env
+        echo "WECHAT_APPID=wx6407bd04526890ef" >> .env
+        echo "WECHAT_SECRET=51df33ed6853726d2a38bbbdfcbc0429" >> .env
+        echo "WECHAT_TEMPLATE_ID=KbF7tOkw01wcmb-9u0rrkqpXB4tH-Fmojw5sChrMY64" >> .env
+        echo "DEEPSEEK_API_KEY=sk-67b7e4b57fc44664945a1fff523e1e1f" >> .env
+        echo "DEEPSEEK_API_URL=https://api.deepseek.com/v1/chat/completions" >> .env
+        echo "CODE_TOKEN=${{ secrets.CODE_TOKEN }}" >> .env
+        echo "GITHUB_REPO=Jie258079/openai-code-review-python" >> .env
     
     - name: Run code review
       run: |

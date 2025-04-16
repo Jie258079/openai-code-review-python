@@ -1,6 +1,6 @@
 import httpx
 from loguru import logger
-from .config import settings
+from src.core.config import settings
 
 
 class DeepSeekClient:
