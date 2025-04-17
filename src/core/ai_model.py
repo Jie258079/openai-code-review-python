@@ -2,6 +2,8 @@ import httpx
 from loguru import logger
 from src.core.config import settings
 import traceback
+import asyncio
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class DeepSeekClient:
@@ -12,6 +14,39 @@ class DeepSeekClient:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
+        self.timeout = 60  # 设置60秒超时
+
+    @retry(
+        stop=stop_after_attempt(3),  # 最多重试3次
+        wait=wait_exponential(multiplier=1, min=4, max=10),  # 指数退避重试
+        reraise=True
+    )
+    async def _make_api_request(self, prompt: str) -> httpx.Response:
+        """
+        发送API请求，包含重试机制
+        :param prompt: 提示词
+        :return: API响应
+        """
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            return await client.post(
+                self.api_url,
+                headers=self.headers,
+                json={
+                    "model": "deepseek-coder",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "你是一个专业的代码评审专家，请对代码进行全面的评审。"
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "temperature": 0.7,
+                    "max_tokens": 2000
+                }
+            )
 
     async def review_code(self, diff_content: str) -> str:
         """
@@ -21,40 +56,24 @@ class DeepSeekClient:
         """
         try:
             prompt = settings.REVIEW_PROMPT.format(diff=diff_content)
+            response = await self._make_api_request(prompt)
 
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    self.api_url,
-                    headers=self.headers,
-                    json={
-                        "model": "deepseek-coder",  # 使用DeepSeek的代码模型
-                        "messages": [
-                            {
-                                "role": "system",
-                                "content": "你是一个专业的代码评审专家，请对代码进行全面的评审。"
-                            },
-                            {
-                                "role": "user",
-                                "content": prompt
-                            }
-                        ],
-                        "temperature": 0.7,
-                        "max_tokens": 2000
-                    }
-                )
+            if response.status_code == 200:
+                result = response.json()
+                return result.get("choices", [{}])[0].get("message", {}).get("content", "评审失败：未获取到有效响应")
+            elif response.status_code == 402:
+                error_msg = "DeepSeek API余额不足，请充值后重试"
+                logger.error(error_msg)
+                return error_msg
+            else:
+                error_msg = f"评审失败：HTTP {response.status_code} - {response.text}"
+                logger.error(error_msg)
+                return error_msg
 
-                if response.status_code == 200:
-                    result = response.json()
-                    return result.get("choices", [{}])[0].get("message", {}).get("content", "评审失败：未获取到有效响应")
-                elif response.status_code == 402:
-                    error_msg = "DeepSeek API余额不足，请充值后重试"
-                    logger.error(error_msg)
-                    return error_msg
-                else:
-                    error_msg = f"评审失败：HTTP {response.status_code} - {response.text}"
-                    logger.error(error_msg)
-                    return error_msg
-
+        except httpx.ReadTimeout:
+            error_msg = "DeepSeek API请求超时，请稍后重试"
+            logger.error(error_msg)
+            return error_msg
         except Exception as e:
             # 获取完整的异常堆栈
             error_stack = traceback.format_exc()
@@ -73,6 +92,14 @@ class DeepSeekClient:
             if "余额不足" in review_text:
                 return {
                     "summary": "DeepSeek API余额不足，请充值后重试",
+                    "full_review": review_text,
+                    "status": "error"
+                }
+
+            # 检查是否是超时错误
+            if "请求超时" in review_text:
+                return {
+                    "summary": "DeepSeek API请求超时，请稍后重试",
                     "full_review": review_text,
                     "status": "error"
                 }
