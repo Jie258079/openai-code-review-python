@@ -1,6 +1,7 @@
 import httpx
 from loguru import logger
 from src.core.config import settings
+import traceback
 
 
 class DeepSeekClient:
@@ -45,13 +46,19 @@ class DeepSeekClient:
                 if response.status_code == 200:
                     result = response.json()
                     return result.get("choices", [{}])[0].get("message", {}).get("content", "评审失败：未获取到有效响应")
+                elif response.status_code == 402:
+                    error_msg = "DeepSeek API余额不足，请充值后重试"
+                    logger.error(error_msg)
+                    return error_msg
                 else:
                     error_msg = f"评审失败：HTTP {response.status_code} - {response.text}"
                     logger.error(error_msg)
                     return error_msg
 
         except Exception as e:
-            error_msg = f"评审过程发生错误: {str(e)}"
+            # 获取完整的异常堆栈
+            error_stack = traceback.format_exc()
+            error_msg = f"评审过程发生错误: {str(e)}\n堆栈信息: {error_stack}"
             logger.error(error_msg)
             return error_msg
 
@@ -62,6 +69,22 @@ class DeepSeekClient:
         :return: 格式化后的评审结果
         """
         try:
+            # 检查是否是余额不足错误
+            if "余额不足" in review_text:
+                return {
+                    "summary": "DeepSeek API余额不足，请充值后重试",
+                    "full_review": review_text,
+                    "status": "error"
+                }
+
+            # 检查是否是错误信息
+            if "评审过程发生错误" in review_text:
+                return {
+                    "summary": "代码评审过程中发生错误，请查看完整评审记录",
+                    "full_review": review_text,
+                    "status": "error"
+                }
+
             # 这里可以添加更多的格式化逻辑
             return {
                 "summary": review_text[:200] + "..." if len(review_text) > 200 else review_text,
